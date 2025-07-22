@@ -12,6 +12,7 @@
 #define OQS_KEM_bike_l1_length_ciphertext 1573
 #define OQS_KEM_bike_l1_length_shared_secret 32
 #define OQS_KEM_bike_l1_length_keypair_seed 0
+#define JUNK 0
 OQS_KEM *OQS_KEM_bike_l1_new(void);
 OQS_API OQS_STATUS OQS_KEM_bike_l1_keypair(uint8_t *public_key, uint8_t *secret_key);
 OQS_API OQS_STATUS OQS_KEM_bike_l1_keypair_derand(uint8_t *public_key, uint8_t *secret_key, const uint8_t *seed);
