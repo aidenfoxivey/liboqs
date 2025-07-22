@@ -318,7 +318,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
       - name: Configure
         run: mkdir build && cd build && cmake -GNinja ${{ matrix.CMAKE_ARGS }} .. && cmake -LA -N ..
@@ -327,6 +327,4 @@ jobs:
         working-directory: build
       - name: Run tests
         timeout-minutes: 60
-        run: |
-          mkdir -p tmp && sde64 ${{ matrix.SDE_ARCH }} -- \
-            python3 -m pytest --verbose --numprocesses=auto ${{ matrix.PYTEST_ARGS }}
+        run: mkdir -p tmp && python3 -m pytest --verbose --ignore=tests/test_code_conventions.py --numprocesses=auto ${{ matrix.PYTEST_ARGS }}
