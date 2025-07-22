@@ -5,3 +5,8 @@ config-variables:
   # - DEFAULT_RUNNER
   # - JOB_NAME
   # - ENVIRONMENT_STAGE
+
+# Allow custom runner labels
+self-hosted-runner:
+  labels:
+    - "S390X"
