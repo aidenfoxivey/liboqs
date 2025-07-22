@@ -316,6 +316,13 @@ jobs:
   linux_s390x_remote:
     runs-on: [self-hosted, S390X]
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: s390x
+            CMAKE_ARGS: -DOQS_USE_OPENSSL=ON -DOQS_HAZARDOUS_EXPERIMENTAL_ENABLE_SIG_STFL_KEY_SIG_GEN=ON -DOQS_ENABLE_SIG_STFL_XMSS=ON -DOQS_ENABLE_SIG_STFL_LMS=ON
+            PYTEST_ARGS: --ignore=tests/test_kat_all.py
 
     steps:
       - name: Checkout code
