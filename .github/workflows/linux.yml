@@ -329,3 +329,49 @@ jobs:
         run: |
           mkdir -p tmp && sde64 ${{ matrix.SDE_ARCH }} -- \
             python3 -m pytest --verbose --numprocesses=auto ${{ matrix.PYTEST_ARGS }}
+
+  linux_s390x_remote:
+      runs-on: [self-hosted, S390X]
+      timeout-minutes: 30
+      strategy:
+        fail-fast: false
+        matrix:
+          include:
+            - name: s390x
+              CMAKE_ARGS: -DOQS_USE_OPENSSL=ON -DOQS_HAZARDOUS_EXPERIMENTAL_ENABLE_SIG_STFL_KEY_SIG_GEN=ON -DOQS_ENABLE_SIG_STFL_XMSS=ON -DOQS_ENABLE_SIG_STFL_LMS=ON
+              PYTEST_ARGS: --ignore=tests/test_kat_all.py
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+        - name: Configure
+          run: mkdir build && cd build && cmake -GNinja ${{ matrix.CMAKE_ARGS }} .. && cmake -LA -N ..
+        - name: Build
+          run: ninja
+          working-directory: build
+        - name: Run tests
+          timeout-minutes: 60
+          run: mkdir -p tmp && python3 -m pytest --verbose --ignore=tests/test_code_conventions.py --numprocesses=auto ${{ matrix.PYTEST_ARGS }}
+
+  linux_ppc64le_remote:
+      runs-on: [self-hosted, PPC64LE]
+      timeout-minutes: 30
+      strategy:
+        fail-fast: false
+        matrix:
+          include:
+            - name: ppc64le
+              CMAKE_ARGS: -DOQS_USE_OPENSSL=ON -DOQS_HAZARDOUS_EXPERIMENTAL_ENABLE_SIG_STFL_KEY_SIG_GEN=ON -DOQS_ENABLE_SIG_STFL_XMSS=ON -DOQS_ENABLE_SIG_STFL_LMS=ON
+              PYTEST_ARGS: --ignore=tests/test_kat_all.py
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+        - name: Configure
+          run: mkdir build && cd build && cmake -GNinja ${{ matrix.CMAKE_ARGS }} .. && cmake -LA -N ..
+        - name: Build
+          run: ninja
+          working-directory: build
+        - name: Run tests
+          timeout-minutes: 60
+          run: mkdir -p tmp && python3 -m pytest --verbose --ignore=tests/test_code_conventions.py --numprocesses=auto ${{ matrix.PYTEST_ARGS }}
