@@ -1,22 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 cmake_minimum_required (VERSION 3.15)
-# option() honors normal variables.
-# see: https://cmake.org/cmake/help/git-stage/policy/CMP0077.html
-if(POLICY CMP0077)
-    cmake_policy(SET CMP0077 NEW)
-endif()
-# Honor symbol visibility properties for all target types.
-# see: https://cmake.org/cmake/help/git-stage/policy/CMP0063.html
-if(POLICY CMP0063)
-    cmake_policy(SET CMP0063 NEW)
-endif()
-if(POLICY CMP0066)
-    cmake_policy(SET CMP0066 NEW)
-endif()
-if(POLICY CMP0067)
-    cmake_policy(SET CMP0067 NEW)
-endif()
 
 project(liboqs C ASM)
 
