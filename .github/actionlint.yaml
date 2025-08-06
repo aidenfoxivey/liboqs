@@ -5,3 +5,8 @@ config-variables:
   # - DEFAULT_RUNNER
   # - JOB_NAME
   # - ENVIRONMENT_STAGE
+
+self-hosted-runner:
+  labels:
+    - "S390X"
+    - "PPC64LE"
