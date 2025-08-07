@@ -51,7 +51,8 @@
               "-DCMAKE_INSTALL_PREFIX=${placeholder "out"}"
               "-DCMAKE_INSTALL_FULL_LIBDIR=${placeholder "out"}/lib"
               "-DCMAKE_INSTALL_FULL_INCLUDEDIR=${placeholder "out"}/include"
-            ];
+            ] ++ pkgs.lib.optionals (builtins.getEnv "CMAKE_EXTRA_FLAGS" != "") 
+                 (pkgs.lib.splitString " " (builtins.getEnv "CMAKE_EXTRA_FLAGS"));
           };
       in {
         shared = mkLib true;
