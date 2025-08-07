@@ -160,6 +160,11 @@ jobs:
   nixflakecheck:
     name: Check that Nix flake has correct syntax and can build
     runs-on: ubuntu-latest
+    env:
+      KEM_NAME: ml_kem_768
+      SIG_NAME: ml_dsa_65
+      CMAKE_EXTRA_FLAGS="-DOQS_MINIMAL_BUILD="SIG_$SIG_NAME""
+
     steps:
       - uses: DeterminateSystems/nix-installer-action@90bb610b90bf290cad97484ba341453bd1cbefea # v19
       - name: Checkout code
@@ -169,4 +174,4 @@ jobs:
       - name: Check flake syntax
         run: nix flake check --no-build # check for accurate syntax
       - name: Check that the flake builds
-        run: nix build # check that the build runs
+        run: nix build --impure
