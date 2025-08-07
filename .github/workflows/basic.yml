@@ -92,7 +92,6 @@ jobs:
   cppcheck:
     name: Check C++ linking with example program
     runs-on: ubuntu-latest
-    container: openquantumsafe/ci-ubuntu-latest:latest
     env:
       SIG_NAME: dilithium_2
     steps:
