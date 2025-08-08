@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # pin@v4
       - name: Install actionlint
         run: |
-          bash <(curl -sSL https://raw.githubusercontent.com/rhysd/actionlint/2ab3a12c7848f6c15faca9a92612ef4261d0e370/scripts/download-actionlint.bash)
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/blob/v1.7.7/scripts/download-actionlint.bash)
           sudo mv ./actionlint /usr/local/bin/
       - name: Ensure GitHub actions are valid
         run: actionlint -shellcheck "" # run *without* shellcheck
