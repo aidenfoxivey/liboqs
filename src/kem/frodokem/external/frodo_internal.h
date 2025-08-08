@@ -27,10 +27,14 @@ void frodo_key_encode(uint16_t *out, const uint16_t *in);
 void frodo_key_decode(uint16_t *out, const uint16_t *in);
 
 // Configuration for endianness
-#if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#if defined(__powerpc64le__) || defined(__ppc64le__)
+    // ppc64le (PowerPC 64-bit little-endian) - force little-endian
+    #define LE_TO_UINT16(n) (n)
+    #define UINT16_TO_LE(n) (n)
+#elif defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
     #define LE_TO_UINT16(n) (((((unsigned short)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
     #define UINT16_TO_LE(n) (((((unsigned short)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
-#elif (TARGET == TARGET_x86 || TARGET == TARGET_AMD64) || (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__))
+#elif (TARGET == TARGET_x86 || TARGET == TARGET_AMD64) || defined(__powerpc64__) || defined(__ppc64__) || (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__))
     #define LE_TO_UINT16(n) (n)
     #define UINT16_TO_LE(n) (n)
 #else
