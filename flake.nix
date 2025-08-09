@@ -1,92 +1,66 @@
 {
+  description = "Library for quantum-safe cryptographic algorithms";
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-  }:
+
+  outputs = {nixpkgs, flake-utils, ...}:
     flake-utils.lib.eachDefaultSystem (system: let
-      name = "liboqs";
-      src = ./.;
       pkgs = nixpkgs.legacyPackages.${system};
 
-      # Function to create compiler-specific package sets
-      mkPackageSet = compiler: let
-        # Override the stdenv to use the specified compiler
-        stdenv =
-          if compiler == "clang"
-          then pkgs.clangStdenv
-          else pkgs.stdenv;
+      mkLiboqs = {compiler ? "gcc", shared ? true, cmakeFlags ? null}: let
+        stdenv = if compiler == "clang" then pkgs.clangStdenv else pkgs.stdenv;
+        compilerPkg = if compiler == "clang" then pkgs.clang else pkgs.gcc;
+      in
+        stdenv.mkDerivation {
+          name = "liboqs";
+          src = ./.;
 
-        mkLib = shared:
-          stdenv.mkDerivation {
-            inherit name src;
-            # for whatever reason, trying to 'fix' the CMake file causes a failure
-            dontFixCmake = true;
+          dontFixCmake = true;
 
-            nativeBuildInputs = with pkgs;
-              [cmake ninja doxygen pkg-config graphviz]
-              ++ (
-                if compiler == "clang"
-                then [pkgs.clang]
-                else [pkgs.gcc]
-              );
+          nativeBuildInputs = with pkgs; [cmake ninja doxygen pkg-config graphviz compilerPkg];
+          buildInputs = [pkgs.openssl];
 
-            buildInputs = with pkgs; [openssl];
+          cmakeFlags = if cmakeFlags != null then cmakeFlags else [
+            "-GNinja"
+            "-DOQS_DIST_BUILD=ON"
+            "-DOQS_BUILD_ONLY_LIB=ON"
+            "-DBUILD_SHARED_LIBS=${if shared then "ON" else "OFF"}"
+          ];
+        };
 
-            cmakeFlags = [
-              "-GNinja"
-              "-DOQS_DIST_BUILD=ON"
-              "-DOQS_BUILD_ONLY_LIB=ON"
-              "-DBUILD_SHARED_LIBS=${
-                if shared
-                then "ON"
-                else "OFF"
-              }"
-              "-DCMAKE_INSTALL_LIBDIR=lib"
-              "-DCMAKE_INSTALL_INCLUDEDIR=include"
-              "-DCMAKE_INSTALL_PREFIX=${placeholder "out"}"
-              "-DCMAKE_INSTALL_FULL_LIBDIR=${placeholder "out"}/lib"
-              "-DCMAKE_INSTALL_FULL_INCLUDEDIR=${placeholder "out"}/include"
-            ];
-          };
-      in {
-        shared = mkLib true;
-        static = mkLib false;
-      };
-
-      # Create development shell for specified compiler
       mkDevShell = compiler: let
-        packageSet = mkPackageSet compiler;
+        lib = mkLiboqs {inherit compiler;};
       in
         pkgs.mkShell {
-          inherit (packageSet.shared) nativeBuildInputs buildInputs;
-
-          # astyle formats C source code and alejandra formats nix source code
+          inherit (lib) nativeBuildInputs buildInputs;
           packages = with pkgs; [astyle alejandra];
-
           shellHook = ''
             export CMAKE_EXPORT_COMPILE_COMMANDS=1
-            echo "Using ${compiler} toolchain"
           '';
         };
     in {
       formatter = pkgs.alejandra;
 
-      packages = {
-        default = (mkPackageSet "gcc").shared; # default is gcc shared
-        gcc-shared = (mkPackageSet "gcc").shared;
-        clang-shared = (mkPackageSet "clang").shared;
-        gcc-static = (mkPackageSet "gcc").static;
-        clang-static = (mkPackageSet "clang").static;
+      packages = rec {
+        default = gcc-shared;
+        gcc-shared = mkLiboqs {};
+        clang-shared = mkLiboqs {compiler = "clang";};
+        gcc-static = mkLiboqs {shared = false;};
+        clang-static = mkLiboqs {compiler = "clang"; shared = false;};
+        minimal = mkLiboqs {
+          cmakeFlags = [
+            "-GNinja"
+            "-DOQS_STRICT_WARNINGS=ON"
+            "-DOQS_MINIMAL_BUILD=KEM_ml_kem_768;SIG_ml_dsa_65"
+          ];
+        };
       };
 
-      # Development shells
-      devShells = {
-        default = mkDevShell "gcc";
+      devShells = rec {
+        default = gcc;
         gcc = mkDevShell "gcc";
         clang = mkDevShell "clang";
       };
